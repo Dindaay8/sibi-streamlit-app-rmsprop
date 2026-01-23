@@ -1,6 +1,6 @@
 import streamlit as st
 import numpy as np
-from tensorflow.keras.models import load_model
+import tensorflow as tf
 from PIL import Image
 
 # ======================
@@ -32,7 +32,7 @@ if "dark_mode" not in st.session_state:
 @st.cache_resource
 def load_cnn_model():
     try:
-        model = load_model(MODEL_PATH, compile=False)
+        model = tf.keras.models.load_model(MODEL_PATH, compile=False)
         class_names = np.load(CLASS_NAMES_PATH, allow_pickle=True)
         return model, class_names
     except Exception as e:
