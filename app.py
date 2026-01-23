@@ -1,6 +1,8 @@
 import streamlit as st
 import numpy as np
 import tensorflow as tf
+import tensorflow as tf
+from tensorflow.keras.layers import InputLayer
 from PIL import Image
 
 # ======================
@@ -29,10 +31,19 @@ if "dark_mode" not in st.session_state:
 # ======================
 # LOAD MODEL
 # ======================
+class FixedInputLayer(InputLayer):
+    def __init__(self, *args, **kwargs):
+        kwargs.pop("batch_shape", None)
+        super().__init__(*args, **kwargs)
+
 @st.cache_resource
 def load_cnn_model():
     try:
-        model = tf.keras.models.load_model(MODEL_PATH, compile=False)
+        model = tf.keras.models.load_model(
+            MODEL_PATH,
+            compile=False,
+            custom_objects={"InputLayer": FixedInputLayer}
+        )
         class_names = np.load(CLASS_NAMES_PATH, allow_pickle=True)
         return model, class_names
     except Exception as e:
