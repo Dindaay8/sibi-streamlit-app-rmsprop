@@ -227,5 +227,4 @@ with col2:
             }
             st.bar_chart(prob_dict)
     else:
-else:
     st.info("Silakan upload gambar untuk melihat hasil prediksi.")
