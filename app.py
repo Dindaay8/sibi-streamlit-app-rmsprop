@@ -226,5 +226,6 @@ with col2:
                 for i in range(len(class_names))
             }
             st.bar_chart(prob_dict)
+
     else:
-    st.info("Silakan upload gambar untuk melihat hasil prediksi.")
+        st.info("Silakan upload gambar untuk melihat hasil prediksi.")
