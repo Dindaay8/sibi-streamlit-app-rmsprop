@@ -227,4 +227,8 @@ with col2:
             }
             st.bar_chart(prob_dict)
     else:
+<<<<<<< Updated upstream
         st.info("Silakan upload gambar untuk melihat hasil prediksi.")
+=======
+        st.info("Silakan upload gambar untuk melihat hasil prediksi.")
+>>>>>>> Stashed changes
