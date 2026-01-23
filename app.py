@@ -1,8 +1,6 @@
 import streamlit as st
 import numpy as np
 import tensorflow as tf
-import tensorflow as tf
-from tensorflow.keras.layers import InputLayer
 from PIL import Image
 
 # ======================
@@ -31,25 +29,18 @@ if "dark_mode" not in st.session_state:
 # ======================
 # LOAD MODEL
 # ======================
-class FixedInputLayer(InputLayer):
-    def __init__(self, *args, **kwargs):
-        kwargs.pop("batch_shape", None)
-        super().__init__(*args, **kwargs)
-
 @st.cache_resource
 def load_cnn_model():
     try:
         model = tf.keras.models.load_model(
             MODEL_PATH,
-            compile=False,
-            custom_objects={"InputLayer": FixedInputLayer}
+            compile=False
         )
         class_names = np.load(CLASS_NAMES_PATH, allow_pickle=True)
         return model, class_names
     except Exception as e:
         st.error(f"Gagal memuat model: {e}")
         st.stop()
-
 
 model, class_names = load_cnn_model()
 
@@ -83,132 +74,25 @@ else:
     BORDER = "#d0d7de"
 
 # ======================
-# CSS GLOBAL (FULL DARK MODE FIX)
-# ======================
-st.markdown(f"""
-<style>
-
-/* ===== APP BACKGROUND ===== */
-html, body, [data-testid="stApp"] {{
-    background-color: {BG};
-    color: {TEXT};
-}}
-
-/* ===== STREAMLIT HEADER (HILANGKAN PUTIH) ===== */
-[data-testid="stHeader"] {{
-    background-color: {BG};
-}}
-
-[data-testid="stHeader"]::after {{
-    background: none;
-}}
-
-[data-testid="stToolbar"] {{
-    background-color: {BG};
-}}
-
-/* ===== SIDEBAR ===== */
-[data-testid="stSidebar"] {{
-    background-color: {SIDEBAR_BG};
-    border-right: 1px solid {BORDER};
-}}
-
-[data-testid="stSidebar"] * {{
-    color: {TEXT} !important;
-}}
-
-/* ===== TEXT ===== */
-h1, h2, h3, h4, h5, h6, p, span, label, div {{
-    color: {TEXT};
-}}
-
-/* ===== FILE UPLOADER ===== */
-[data-testid="stFileUploader"] {{
-    background-color: {CARD};
-    border-radius: 12px;
-    padding: 15px;
-    border: 1px solid {BORDER};
-}}
-
-/* ===== CARD ===== */
-.card {{
-    background-color: {CARD};
-    padding: 30px;
-    border-radius: 16px;
-    border: 1px solid {BORDER};
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-}}
-
-/* ===== RESULT LETTER ===== */
-.result-letter {{
-    font-size: 80px;
-    font-weight: bold;
-    color: {ACCENT};
-    text-align: center;
-}}
-
-/* ===== SUBTITLE ===== */
-.subtitle {{
-    color: {MUTED};
-    font-size: 16px;
-}}
-
-</style>
-""", unsafe_allow_html=True)
-
-# ======================
-# SIDEBAR INFO
-# ======================
-st.sidebar.markdown("---")
-st.sidebar.markdown("### 📌 Tentang Aplikasi")
-st.sidebar.write("""
-Sistem ini menggunakan **Convolutional Neural Network (CNN)**  
-untuk mengenali **huruf Bahasa Isyarat Indonesia (SIBI)**  
-berdasarkan citra tangan.
-""")
-
-st.sidebar.markdown("---")
-st.sidebar.write("**Input:** Citra tangan")
-st.sidebar.write("**Output:** Huruf A–Z")
-st.sidebar.write("**Model:** CNN + RMSprop")
-st.sidebar.markdown("---")
-st.sidebar.caption("© Sistem Pengenalan SIBI")
-
-# ======================
-# HEADER UTAMA
+# HEADER
 # ======================
 st.title("Sistem Pengenalan Bahasa Isyarat Indonesia (SIBI)")
-st.markdown(
-    "<p class='subtitle'>Unggah citra isyarat tangan untuk memprediksi huruf SIBI menggunakan model CNN.</p>",
-    unsafe_allow_html=True
-)
+st.markdown("Unggah citra isyarat tangan untuk memprediksi huruf SIBI menggunakan CNN.")
 st.markdown("---")
 
-# ======================
-# MAIN LAYOUT
-# ======================
 col1, col2 = st.columns([1, 1.2])
 
-# ======================
-# LEFT COLUMN (UPLOAD)
-# ======================
 with col1:
-    st.markdown("### 📤 Upload Gambar")
     uploaded_file = st.file_uploader(
-        "Pilih gambar isyarat tangan",
+        "📤 Upload gambar isyarat tangan",
         type=["jpg", "jpeg", "png"]
     )
-
     if uploaded_file:
         image = Image.open(uploaded_file).convert("RGB")
         st.image(image, caption="Citra Input", use_column_width=True)
 
-# ======================
-# RIGHT COLUMN (RESULT)
-# ======================
 with col2:
     st.markdown("### 📊 Hasil Prediksi")
-
     if uploaded_file:
         img = image.resize(IMG_SIZE)
         img_array = np.array(img) / 255.0
@@ -219,24 +103,9 @@ with col2:
         pred_class = class_names[idx]
         confidence = float(np.max(preds))
 
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.markdown(
-            f"<div class='result-letter'>{pred_class}</div>",
-            unsafe_allow_html=True
-        )
-        st.markdown(
-            f"<p style='text-align:center;'>Confidence: <b>{confidence*100:.2f}%</b></p>",
-            unsafe_allow_html=True
-        )
+        st.markdown(f"### 🔤 Huruf: **{pred_class}**")
         st.progress(confidence)
-        st.markdown("</div>", unsafe_allow_html=True)
-
-        with st.expander("📈 Detail Probabilitas Semua Kelas"):
-            prob_dict = {
-                class_names[i]: float(preds[0][i])
-                for i in range(len(class_names))
-            }
-            st.bar_chart(prob_dict)
+        st.write(f"Confidence: **{confidence*100:.2f}%**")
 
     else:
         st.info("Silakan upload gambar untuk melihat hasil prediksi.")
