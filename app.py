@@ -204,7 +204,7 @@ with col2:
         pred_class = class_names[idx]
         confidence = float(np.max(preds))
 
-        CONFIDENCE_THRESHOLD = 0.65  
+        CONFIDENCE_THRESHOLD = 0.50  
 
         st.markdown("<div class='card'>", unsafe_allow_html=True)
         
