@@ -204,17 +204,25 @@ with col2:
         pred_class = class_names[idx]
         confidence = float(np.max(preds))
 
+        CONFIDENCE_THRESHOLD = 0.80  # 80%
+
         st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.markdown(
-            f"<div class='result-letter'>{pred_class}</div>",
-            unsafe_allow_html=True
-        )
-        st.markdown(
-            f"<p style='text-align:center;'>Confidence: <b>{confidence*100:.2f}%</b></p>",
-            unsafe_allow_html=True
-        )
-        st.progress(confidence)
+        
+        if confidence < CONFIDENCE_THRESHOLD:
+            st.error("❌ Gambar bukan bahasa isyarat SIBI.\n\nSilakan gunakan gambar isyarat tangan yang jelas.")
+        else:
+            st.markdown(
+                f"<div class='result-letter'>{pred_class}</div>",
+                unsafe_allow_html=True
+            )
+            st.markdown(
+                f"<p style='text-align:center;'>Confidence: <b>{confidence*100:.2f}%</b></p>",
+                unsafe_allow_html=True
+            )
+            st.progress(confidence)
+        
         st.markdown("</div>", unsafe_allow_html=True)
+
 
         with st.expander("📈 Detail Probabilitas Semua Kelas"):
             prob_dict = {
